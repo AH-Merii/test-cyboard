@@ -1,0 +1,6 @@
+/* Right half: include 36-key transform + add row-offset for split */
+#include "imprint_36key.dtsi"
+
+&imprint_36key {
+    row-offset = <7>;
+};

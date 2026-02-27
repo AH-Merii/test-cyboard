@@ -1,0 +1,33 @@
+/*
+ * 36-key (3x5+3) matrix transform for Cyboard Imprint
+ * Derived from imprint_letters_only_no_bottom_row by dropping:
+ *   - Outermost pinky column per side (col 5)
+ *   - Bottom thumb row
+ *
+ * Matrix: 8 cols x 14 rows. Left rows 0-6, right rows 7-13.
+ * Left alpha cols 5->0 (reversed), right alpha cols 0->5.
+ *
+ * Keymap position indices:
+ *  0  1  2  3  4        5  6  7  8  9
+ * 10 11 12 13 14       15 16 17 18 19
+ * 20 21 22 23 24       25 26 27 28 29
+ *             30 31 32    33 34 35
+ */
+
+#ifndef CELL
+#define CELL(row, col) ((row << 8) | col)
+#endif
+
+/ {
+    imprint_36key: imprint_36key {
+        compatible = "zmk,matrix-transform";
+        columns = <8>;
+        rows = <14>;
+        map = <
+            CELL(4,4) CELL(4,3) CELL(4,2) CELL(4,1) CELL(4,0)     CELL(11,0) CELL(11,1) CELL(11,2) CELL(11,3) CELL(11,4)
+            CELL(3,4) CELL(3,3) CELL(3,2) CELL(3,1) CELL(3,0)     CELL(10,0) CELL(10,1) CELL(10,2) CELL(10,3) CELL(10,4)
+            CELL(2,4) CELL(2,3) CELL(2,2) CELL(2,1) CELL(2,0)     CELL(9,0)  CELL(9,1)  CELL(9,2)  CELL(9,3)  CELL(9,4)
+                                CELL(0,3) CELL(0,2) CELL(0,1)     CELL(7,1)  CELL(7,2)  CELL(7,3)
+        >;
+    };
+};
