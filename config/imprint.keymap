@@ -1,12 +1,13 @@
 /*
- * Cyboard Imprint 36-key keymap
+ * Cyboard Imprint keymap — TEST BUILD
+ * Using stock imprint_letters_only_no_bottom_row (48-key) transform
+ * to verify left-half hardware. Outer pinky columns and 2nd thumb row = &none.
+ *
  * Ported from Skyline 34-key config with urob's timeless home row mods
  */
 
 #include <input/processors.dtsi>
 #include <dt-bindings/zmk/input_transform.h>
-// Matrix row-col encoding for custom transform (avoids RC() conflict with modifiers.h)
-#define CELL(row, col) ((row << 8) | col)
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/keys.h>
@@ -15,25 +16,6 @@
 // Home row mods macro - using urob's timeless configuration
 #define HRML(k1,k2,k3,k4) &hml LSHFT k1  &hml LGUI k2  &hml LCTRL k3  &hml LALT k4
 #define HRMR(k1,k2,k3,k4) &hmr RALT k1  &hmr RCTRL k2  &hmr RGUI k3  &hmr RSHFT k4
-
-/* Override upstream transform with 36-key (3x5+3) map.
- * Dropping outermost pinky column per side (col 5) + bottom thumb row.
- * Using imprint_letters_only_no_bottom_row so imprint_right.overlay's
- * row-offset = <7> applies automatically to the right half.
- *
- *  0  1  2  3  4        5  6  7  8  9
- * 10 11 12 13 14       15 16 17 18 19
- * 20 21 22 23 24       25 26 27 28 29
- *             30 31 32    33 34 35
- */
-&imprint_letters_only_no_bottom_row {
-    map = <
-        CELL(4,4) CELL(4,3) CELL(4,2) CELL(4,1) CELL(4,0)     CELL(11,0) CELL(11,1) CELL(11,2) CELL(11,3) CELL(11,4)
-        CELL(3,4) CELL(3,3) CELL(3,2) CELL(3,1) CELL(3,0)     CELL(10,0) CELL(10,1) CELL(10,2) CELL(10,3) CELL(10,4)
-        CELL(2,4) CELL(2,3) CELL(2,2) CELL(2,1) CELL(2,0)     CELL(9,0)  CELL(9,1)  CELL(9,2)  CELL(9,3)  CELL(9,4)
-                             CELL(0,3) CELL(0,2) CELL(0,1)     CELL(7,1)  CELL(7,2)  CELL(7,3)
-    >;
-};
 
 / {
     chosen {
@@ -63,7 +45,7 @@
             tapping-term-ms = <280>;
             quick-tap-ms = <175>;
             require-prior-idle-ms = <75>;
-            hold-trigger-key-positions = <5 6 7 8 9 15 16 17 18 19 25 26 27 28 29 33 34 35>;
+            hold-trigger-key-positions = <6 7 8 9 10 11 18 19 20 21 22 23 30 31 32 33 34 35 39 40 41 45 46 47>;
             hold-trigger-on-release;
         };
 
@@ -76,7 +58,7 @@
             tapping-term-ms = <280>;
             quick-tap-ms = <175>;
             require-prior-idle-ms = <75>;
-            hold-trigger-key-positions = <0 1 2 3 4 10 11 12 13 14 20 21 22 23 24 30 31 32>;
+            hold-trigger-key-positions = <0 1 2 3 4 5 12 13 14 15 16 17 24 25 26 27 28 29 36 37 38 42 43 44>;
             hold-trigger-on-release;
         };
 
@@ -86,6 +68,17 @@
             #binding-cells = <2>;
             tapping-term-ms = <150>;
             quick-tap-ms = <150>;
+            flavor = "tap-preferred";
+            bindings = <&mo>, <&kp>;
+        };
+
+        htl_idle: hold_tap_layer_idle {
+            compatible = "zmk,behavior-hold-tap";
+            display-name = "SCROLL_TAP";
+            #binding-cells = <2>;
+            tapping-term-ms = <150>;
+            quick-tap-ms = <150>;
+            require-prior-idle-ms = <150>;
             flavor = "tap-preferred";
             bindings = <&mo>, <&kp>;
         };
@@ -103,9 +96,10 @@
     combos {
         compatible = "zmk,combos";
         // Trigger capslock by pressing and holding both shift keys
+        // A/LSft = pos 13, ;/RSft = pos 22 in 48-key layout
         combo_caps {
             timeout-ms = <50>;
-            key-positions = <10 19>;
+            key-positions = <13 22>;
             bindings = <&kp CAPS>;
             layers = <0>;
         };
@@ -116,132 +110,121 @@
 
         default_layer {
             bindings = <
-        //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-        //│  Q       │  W       │  E       │  R       │  T       │   │  Y       │  U       │  I       │  O       │  P       │
-           &kp Q      &kp W      &kp E      &kp R      &kp T          &kp Y      &kp U      &kp I      &kp O      &kp P
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  A/LSft  │  S/LGUI  │  D/LCtl  │  F/LAlt  │  G       │   │  H       │  J/RAlt  │  K/RCtl  │  L/RGUI  │  ;/RSft  │
-           HRML(A,        S,         D,         F)     &kp G          &kp H      HRMR(J,        K,         L,        SEMI)
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  Z       │  X       │  C       │  V       │  B       │   │  N       │  M       │  , <     │  . >     │  / ?     │
-           &kp Z      &kp X      &kp C      &kp V      &kp B          &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH
-        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────╯
+        //╭──────────┬──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────┬──────────╮
+        //│ (none)   │  Q       │  W       │  E       │  R       │  T       │   │  Y       │  U       │  I       │  O       │  P       │ (none)   │
+           &none      &kp Q      &kp W      &kp E      &kp R      &kp T          &kp Y      &kp U      &htl_idle 7 I  &kp O      &kp P      &none
+        //├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+        //│ (none)   │  A/LSft  │  S/LGUI  │  D/LCtl  │  F/LAlt  │  G       │   │  H       │  J/RAlt  │  K/RCtl  │  L/RGUI  │  ;/RSft  │ (none)   │
+           &none      HRML(A,        S,         D,         F)     &kp G          &kp H      HRMR(J,        K,         L,        SEMI)    &none
+        //├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+        //│ (none)   │  Z       │  X       │  C       │  V       │  B       │   │  N       │  M       │  , <     │  . >     │  / ?     │ (none)   │
+           &none      &kp Z      &kp X      &kp C      &kp V      &kp B          &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH   &none
+        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────┴──────────╯
         //                                 │ Hyp/ESC  │ Num/ENT  │  TAB     │   │  DEL     │ Arr/BSP  │ Sym/SPC  │
-                                           &ht_hp 0 ESC &htl 3 ENTER &kp TAB    &kp DEL  &htl 1 BSPC &htl 4 SPACE
+                                           &ht_hp 0 ESC &htl 3 ENTER &kp TAB    &kp DEL  &htl 4 SPACE &htl 1 BSPC
+        //                                 │ (none)   │ (none)   │ (none)   │   │ (none)   │ (none)   │ (none)   │
+                                            &none      &none      &none          &none      &none      &none
         //                                 ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
             >;
         };
 
         arrow_layer {
             bindings = <
-        //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-        //│  TAB     │          │          │          │          │   │          │          │          │          │  DEL     │
-           &kp TAB    &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &kp DEL
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│          │          │          │          │          │   │  LEFT    │  DOWN    │  UP      │  RIGHT   │          │
-           &trans     &trans     &trans     &trans     &trans         &kp LARW   &kp DARW   &kp UARW   &kp RARW   &trans
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-           &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans
-        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────╯
-                                           &htl 5 ESC &htl 2 ENTER &trans      &trans     &trans     &trans
-        //                                 ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
+           &none      &kp TAB    &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &kp DEL    &none
+           &none      &trans     &trans     &trans     &trans     &trans         &kp LARW   &kp DARW   &kp UARW   &kp RARW   &trans     &none
+           &none      &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans     &none
+                                            &htl 5 ESC &htl 2 ENTER &trans      &trans     &trans     &trans
+                                            &none      &none      &none          &none      &none      &none
             >;
         };
 
         navigation_layer {
             bindings = <
-        //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-           &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│          │          │          │          │          │   │  HOME    │  PG_DN   │  PG_UP   │  END     │          │
-           &trans     &trans     &trans     &trans     &trans         &kp HOME   &kp PG_DN  &kp PG_UP  &kp END    &trans
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-           &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans
-        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────╯
-                                            &trans     &trans     &trans         &trans     &trans     &trans
-        //                                 ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
+           &none      &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans     &none
+           &none      &trans     &trans     &trans     &trans     &trans         &kp HOME   &kp PG_DN  &kp PG_UP  &kp END    &trans     &none
+           &none      &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans     &none
+                                             &trans     &trans     &trans         &trans     &trans     &trans
+                                             &none      &none      &none          &none      &none      &none
             >;
         };
 
         number_layer {
             bindings = <
-        //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-        //│  TAB     │          │  VOL DN  │  VOL UP  │          │   │          │          │          │          │          │
-           &kp TAB    &trans  &kp C_VOL_DN &kp C_VOL_UP &trans        &trans     &trans     &trans     &trans     &trans
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  1       │  2       │  3       │  4       │  5       │   │  6       │  7       │  8       │  9       │  0       │
-           &kp N1     &kp N2     &kp N3     &kp N4     &kp N5         &kp N6     &kp N7     &kp N8     &kp N9     &kp N0
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│          │          │          │  PLAY    │          │   │  ` ~     │  ' "     │  "       │          │          │
-           &trans     &trans     &trans     &kp C_PP   &trans         &kp GRAVE  &kp SQT    &kp DQT    &trans     &trans
-        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────╯
-                                            &trans     &trans     &trans         &trans     &trans     &trans
-        //                                 ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
+           &none      &kp TAB    &trans  &kp C_VOL_DN &kp C_VOL_UP &trans        &trans     &trans     &trans     &trans     &trans     &none
+           &none      &kp N1     &kp N2     &kp N3     &kp N4     &kp N5         &kp N6     &kp N7     &kp N8     &kp N9     &kp N0     &none
+           &none      &trans     &trans     &trans     &kp C_PP   &trans         &kp GRAVE  &kp SQT    &kp DQT    &trans     &trans     &none
+                                             &trans     &trans     &trans         &trans     &trans     &trans
+                                             &none      &none      &none          &none      &none      &none
             >;
         };
 
         symbol_layer {
             bindings = <
-        //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-        //│  |       │  _       │  -       │  =       │  &       │   │  $       │  `       │  +       │  *       │  ^       │
-           &kp PIPE   &kp UNDER  &kp MINUS  &kp EQUAL  &kp AMPS       &kp DLLR   &kp GRAVE  &kp PLUS   &kp STAR   &kp CARET
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  \       │  {       │  [       │  (       │  <       │   │  >       │  )       │  ]       │  }       │  %       │
-           &kp BSLH   &kp LBRC   &kp LBKT   &kp LPAR   &kp LT         &kp GT     &kp RPAR   &kp RBKT   &kp RBRC   &kp PRCNT
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│          │          │          │  @       │  #       │   │  !       │  ~       │          │          │          │
-           &trans     &trans     &trans     &kp AT     &kp HASH       &kp EXCL   &kp TILDE  &trans     &trans     &trans
-        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────╯
-                                            &trans     &trans     &trans         &trans     &trans     &trans
-        //                                 ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
+           &none      &kp PIPE   &kp UNDER  &kp MINUS  &kp EQUAL  &kp AMPS       &kp DLLR   &kp GRAVE  &kp PLUS   &kp STAR   &kp CARET  &none
+           &none      &kp BSLH   &kp LBRC   &kp LBKT   &kp LPAR   &kp LT         &kp GT     &kp RPAR   &kp RBKT   &kp RBRC   &kp PRCNT  &none
+           &none      &trans     &trans     &trans     &kp AT     &kp HASH       &kp EXCL   &kp TILDE  &trans     &trans     &trans     &none
+                                             &trans     &trans     &trans         &trans     &trans     &trans
+                                             &none      &none      &none          &none      &none      &none
             >;
         };
 
         func_layer {
             bindings = <
-        //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-        //│BOOTLOADR │          │  BT PRV  │  BT NXT  │  BT 0    │   │  BT 3    │  F7      │  F8      │  F9      │BOOTLOADR │
-           &bootloader &trans     &bt BT_PRV &bt BT_NXT &bt BT_SEL 0   &bt BT_SEL 3 &kp F7   &kp F8     &kp F9     &bootloader
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  F10     │  F11     │  F12     │  F13     │  BT 1    │   │          │  F4      │  F5      │  F6      │          │
-           &kp F10    &kp F11    &kp F12    &kp F13    &bt BT_SEL 1   &trans     &kp F4     &kp F5     &kp F6     &trans
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│          │          │          │  BT CLR  │  BT 2    │   │          │  F1      │  F2      │  F3      │          │
-           &none      &trans     &trans     &bt BT_CLR &bt BT_SEL 2   &trans     &kp F1     &kp F2     &kp F3     &trans
-        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────╯
-                                            &trans     &trans     &trans         &trans     &trans     &trans
-        //                                 ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
+           &none      &bootloader &trans     &bt BT_PRV &bt BT_NXT &bt BT_SEL 0   &bt BT_SEL 3 &kp F7   &kp F8     &kp F9     &bootloader &none
+           &none      &kp F10    &kp F11    &kp F12    &kp F13    &bt BT_SEL 1   &trans     &kp F4     &kp F5     &kp F6     &trans     &none
+           &none      &none      &trans     &trans     &bt BT_CLR &bt BT_SEL 2   &trans     &kp F1     &kp F2     &kp F3     &trans     &none
+                                             &trans     &trans     &trans         &trans     &trans     &trans
+                                             &none      &none      &none          &none      &none      &none
             >;
         };
 
         mouse_layer {
             bindings = <
-        //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-        //│          │          │          │          │          │   │  LCLK    │  RCLK    │          │          │          │
-           &trans     &trans     &trans     &trans     &trans         &mkp LCLK  &mkp RCLK  &trans     &trans     &trans
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-           &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans
-        //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│          │          │          │          │          │   │  MCLK    │          │          │          │          │
-           &trans     &trans     &trans     &trans     &trans         &mkp MCLK  &trans     &trans     &trans     &trans
-        //╰──────────┴──────────┴──────────┼──────────┼──────────┼──────────╮   ╭──────────┼──────────┼──────────┴──────────┴──────────╯
-                                            &trans     &trans     &trans         &trans     &trans     &trans
-        //                                 ╰──────────┴──────────┴──────────╯   ╰──────────┴──────────┴──────────╯
+           &none      &trans     &trans     &trans     &trans     &trans         &mkp LCLK  &mkp RCLK  &trans     &trans     &trans     &none
+           &none      &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans     &none
+           &none      &trans     &trans     &trans     &trans     &trans         &mkp MCLK  &trans     &trans     &trans     &trans     &none
+                                             &trans     &trans     &trans         &trans     &trans     &trans
+                                             &none      &none      &none          &none      &none      &none
+            >;
+        };
+
+        scroll_layer {
+            bindings = <
+           &trans     &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans     &trans
+           &trans     &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans     &trans
+           &trans     &trans     &trans     &trans     &trans     &trans         &trans     &trans     &trans     &trans     &trans     &trans
+                                             &trans     &trans     &trans         &trans     &trans     &trans
+                                             &trans     &trans     &trans         &trans     &trans     &trans
             >;
         };
     };
 };
 
 // Left trackball (central) = scroll wheel
+// Lower CPI on left trackball for slower scroll (default 600)
+&trackball_central {
+    cpi = <200>;
+};
+
 &trackball_central_listener {
     input-processors =
-        <&zip_xy_scaler 1 3>,
+        <&zip_xy_scaler 1 8>,
         <&zip_xy_to_scroll_mapper>,
         <&zip_scroll_transform INPUT_TRANSFORM_Y_INVERT>;
 };
 
 // Right trackball (peripheral) = mouse cursor + auto-mouse layer
+// Hold arrow_layer key (layer 1) -> trackball becomes scroll wheel
 &trackball_peripheral_listener {
+    scroll_mode {
+        layers = <7>;
+        input-processors =
+            <&zip_xy_scaler 1 8>,
+            <&zip_xy_scaler 1 3>,
+            <&zip_xy_to_scroll_mapper>,
+            <&zip_scroll_transform INPUT_TRANSFORM_Y_INVERT>;
+    };
+
     input-processors =
         <&zip_temp_layer 6 500>;
 };

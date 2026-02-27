@@ -1,0 +1,2 @@
+/* Left half: include 36-key transform (no row-offset needed) */
+#include "imprint_36key.dtsi"
