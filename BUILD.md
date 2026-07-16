@@ -66,6 +66,8 @@ Generate fresh normal images with `./build-local.sh left` and `./build-local.sh 
 
 The first build downloads the large ZMK Docker image and west dependencies. Subsequent builds reuse the named Docker volume `zmk-imprint-west` for source checkouts and build intermediates.
 
+The script records the manifest and resolved west project revisions for each target. When those revisions change, it automatically creates a pristine build for that target while retaining downloaded sources. Later builds remain incremental until the dependencies change again.
+
 Remove that cache with:
 
 ```sh
@@ -78,12 +80,12 @@ Removing the volume deletes only cached sources and build intermediates. It does
 
 The script uses `--pull=always`, so every build refreshes the mutable official `docker.io/zmkfirmware/zmk-build-arm:stable` image. It also runs `west update` every time.
 
-Both ZMK and `zmk-keyboards` use moving `main` revisions in `config/west.yml`. Builds performed at different times can therefore use different upstream commits even when this repository has not changed.
+`config/west.yml` tracks ZMK's moving `main` branch and the moving `zmk-keyboards` `zephyr-4.1` branch. This pairing provides the current Zephyr hardware model; `zmk-keyboards/main` instead targets ZMK v0.3.0. Builds performed at different times can therefore use different upstream commits even when this repository has not changed.
 
 ## Troubleshooting
 
 - `Docker CLI is required but was not found in PATH`: install Docker using the official instructions and reopen the terminal if necessary.
 - `Docker daemon is not running or is inaccessible`: start Docker and ensure the current user has permission to access its daemon.
-- A west update or firmware build fails after previously succeeding: upstream `main` or the mutable Docker image may have changed. Review the build output and retry after upstream issues are resolved.
-- A stale or damaged workspace causes build failures: remove `zmk-imprint-west` with the cache-removal command above and rebuild.
+- A west update or firmware build fails after previously succeeding: an upstream branch or the mutable Docker image may have changed. Review the build output and retry after upstream issues are resolved.
+- Automatic pristine rebuilding cannot recover a damaged west source workspace: remove `zmk-imprint-west` with the cache-removal command above and rebuild.
 - The `ASSIMILATOR` drive does not appear: confirm that the intended half is connected over USB and double-tap the reset button next to the USB-C port again. ZMK's [flashing troubleshooting documentation](https://zmk.dev/docs/troubleshooting/flashing-issues) covers additional UF2 issues.

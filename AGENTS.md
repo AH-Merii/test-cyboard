@@ -4,7 +4,7 @@
 - This is a ZMK user config for a Cyboard Imprint keyboard, not a standalone app; firmware overrides live in `config/`.
 - Derive the checkout with `git rev-parse --show-toplevel` and inspect its remote with `git remote get-url origin`; neither the local path nor repository name is stable.
 - CI delegates from `.github/workflows/build.yml` to `zmkfirmware/zmk/.github/workflows/build-user-config.yml@main`; `build.yaml` is the matrix.
-- `config/west.yml` imports both `zmk` and `zmk-keyboards` from moving `main` revisions. There is no lockfile, so upstream changes can alter or break unchanged builds.
+- `config/west.yml` tracks ZMK's moving `main` branch and the moving `zmk-keyboards` `zephyr-4.1` branch. The branch pairing is required because `zmk-keyboards/main` targets ZMK v0.3.0 and the obsolete Zephyr hardware model. There is no lockfile, so upstream changes can alter or break unchanged builds.
 - `boards/shields/` contains no local hardware definitions. The `assimilator-bt` board and `imprint_*` shields come from `zmk-keyboards`.
 - Because `zephyr/module.yml` exists, the delegated workflow copies `config/` to an isolated workspace and passes this checkout as `ZMK_EXTRA_MODULES`; mirror that behavior locally.
 
@@ -12,6 +12,7 @@
 - CI currently builds board `assimilator-bt` with shields `imprint_left`, `imprint_right`, and `imprint_left settings_reset`.
 - There is no repo-local lint or test harness; compiling the relevant firmware targets is the verification step.
 - Do not initialize a west workspace in this repo root. `./build-local.sh` is the supported local build entry point and uses a Docker volume outside the checkout for west sources and build intermediates.
+- `build-local.sh` tracks dependency revisions per target and automatically requests a pristine target build when they change; manual Docker volume removal is reserved for a damaged west source workspace.
 - Read `BUILD.md` when building firmware or when changing, verifying, or troubleshooting the local build workflow. Do not load `BUILD.md` for unrelated keymap work.
 - If Docker is unavailable, report that firmware compilation could not be performed rather than initializing west in the repository root.
 

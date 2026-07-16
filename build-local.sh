@@ -78,8 +78,33 @@ docker run \
         fi
         west update --fetch-opt=--filter=tree:0
         west zephyr-export
+
+        DEPENDENCY_STATE="$(
+            printf "manifest:%s\n" "$(git hash-object -- /work/config/west.yml)"
+            while IFS=: read -r PROJECT_NAME PROJECT_PATH; do
+                if [[ "$PROJECT_NAME" == "manifest" ]]; then
+                    continue
+                fi
+                printf "%s:%s\n" "$PROJECT_NAME" "$(git -C "$PROJECT_PATH" rev-parse HEAD)"
+            done < <(west list -f "{name}:{abspath}")
+        )"
+        STATE_DIR="/work/.build-state"
+        STATE_FILE="$STATE_DIR/$TARGET-dependencies"
+        PRISTINE="auto"
+
+        if [[ -d "/work/build/$TARGET" ]]; then
+            PREVIOUS_DEPENDENCY_STATE=""
+            if [[ -f "$STATE_FILE" ]]; then
+                PREVIOUS_DEPENDENCY_STATE="$(< "$STATE_FILE")"
+            fi
+            if [[ "$PREVIOUS_DEPENDENCY_STATE" != "$DEPENDENCY_STATE" ]]; then
+                printf "Dependency revisions changed; creating a pristine %s build.\n" "$TARGET"
+                PRISTINE="always"
+            fi
+        fi
+
         west build \
-            -p auto \
+            -p "$PRISTINE" \
             -s zmk/app \
             -d "/work/build/$TARGET" \
             -b assimilator-bt \
@@ -87,6 +112,8 @@ docker run \
             -DZMK_CONFIG=/work/config \
             -DZMK_EXTRA_MODULES=/repo \
             "-DSHIELD=$SHIELD"
+        mkdir -p "$STATE_DIR"
+        printf "%s\n" "$DEPENDENCY_STATE" > "$STATE_FILE"
         cp "/work/build/$TARGET/zephyr/zmk.uf2" "/out/imprint-$TARGET.uf2"
         chown "$HOST_UID:$HOST_GID" "/out/imprint-$TARGET.uf2"
     '
